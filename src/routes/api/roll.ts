@@ -4,7 +4,7 @@ import { MongoClient } from 'mongodb';
 const uri = "mongodb+srv://martin:ByyYSSEieTnSuD6k@cluster0.wvjww.mongodb.net/myFirstDatabase?retryWrites=true&w=majority";
 const client = new MongoClient(uri);
 const dbName = "qq";
-const collectionName = "csgo_test";
+const collectionName = "csgo";
 
 
 export async function post(event: RequestEvent) {
@@ -20,7 +20,8 @@ export async function post(event: RequestEvent) {
             draw_time: new Date(body.drawTime),
             group_code: body.senderId.Group.Code,
             group_name: body.senderId.Group.Name,
-            participants: null
+            source: "web",
+            participants: [],
         })
         insertedId = result.insertedId.toString();
 

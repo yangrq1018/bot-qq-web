@@ -74,7 +74,7 @@
 
 		<div class="field">
 			<Autocomplete
-				getOptionLabel={(option) => (option ? option.Uin + `(${option.Nickname})` : '')}
+				getOptionLabel={(option) => (option ? option.Uin: '')}
 				search={async (input) => {
 					const linput = input.toLowerCase();
 					if (linput === '') {
