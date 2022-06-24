@@ -14,12 +14,12 @@ export async function post(event: RequestEvent) {
         await client.connect();
         const col = client.db(dbName).collection(collectionName);
         const result = await col.insertOne({
-            sender_id: body.senderId,
-            sender_nickname: body.senderNickname,  // TODO: get from backend
+            sender_id: body.senderId.Uin,
+            sender_nickname: body.senderId.Nickname,
             skin_name: body.skinName,
             draw_time: new Date(body.drawTime),
-            group_code: body.groupCode,
-            group_name: body.groupName, // TODO: get from backend
+            group_code: body.senderId.Group.Code,
+            group_name: body.senderId.Group.Name,
             participants: null
         })
         insertedId = result.insertedId.toString();

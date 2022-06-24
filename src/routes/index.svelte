@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { form, field } from 'svelte-forms';
 	import { required } from 'svelte-forms/validators';
-	import TextField from '@smui/textfield';
+	import Textfield from '@smui/textfield';
 	import Button from '@smui/button';
 	import Select, { Option } from '@smui/select';
 	import { DateInput } from 'date-picker-svelte';
@@ -9,8 +9,9 @@
 	import { toast } from '@zerodevx/svelte-toast';
 	import type { RollEvent } from '$lib/types';
 	import { SvelteToast } from '@zerodevx/svelte-toast';
-	import { onMount } from 'svelte';
 	import Autocomplete from '@smui-extra/autocomplete';
+	import { derived } from 'svelte/store';
+	import type { Field } from 'svelte-forms/types';
 
 	const successOptions = {
 		theme: {
@@ -20,22 +21,21 @@
 	};
 
 	let groups = ['852485822', '1007452144'];
-	let senderIdOptions: any[] = [];
-
-	onMount(async () => {
-		let res = await axios.get('/api/members/' + groups[0]);
-		let members = res.data.members as any[];
-		senderIdOptions = members.map((m, i) => {
-			return m.Uin;
-		});
-		console.log(senderIdOptions);
-	});
 
 	const skinName = field('skinName', '纪念龙狙', [required()]);
 	const senderId = field('senderId', '', [required()]);
 	const drawTime = field('drawTime', new Date(), [required()]);
 	const groupCode = field('groupCode', groups[0], [required()]);
 	const myForm = form(skinName, senderId, drawTime, groupCode);
+
+	function getMembers(x: Field<string>): Promise<any[]> {
+		return axios
+			.get('/api/members/' + x.value)
+			.then((res) => res.data.members)
+			.catch(() => []);
+	}
+
+	let senderIdOptions = derived(groupCode, getMembers);
 
 	function handleSubmit() {
 		myForm.validate().then(() => {
@@ -57,34 +57,58 @@
 <main>
 	<h1>开始抽奖吧</h1>
 	<section>
-		<TextField class="field" bind:value={$skinName.value} label="饰品名称" />
-		{#if $myForm.hasError('skinName.required')}
-			<div class="invalid-alert">名称不能为空</div>
-		{/if}
-
-		<div>
-			<Autocomplete
-				class="field"
-				options={senderIdOptions}
-				bind:value={$senderId.value}
-				label="QQ号码"
-			>
-			</Autocomplete>
-			<!-- <pre class="status">Selected: {$senderId.value ? JSON.stringify($senderId.value) : ''}</pre> -->
+		<div class="field">
+			<Textfield bind:value={$skinName.value} label="饰品名称" />
+			{#if $myForm.hasError('skinName.required')}
+				<div class="invalid-alert">名称不能为空</div>
+			{/if}
 		</div>
 
-		<!-- <TextField class="field" bind:value={$senderId.value} label="QQ号码" /> -->
-		{#if $myForm.hasError('senderId.required')}
-			<div class="invalid-alert">QQ号码不能为空</div>
-		{/if}
-		<Select label="QQ群" class="field" bind:value={$groupCode.value}>
-			{#each groups as group}
-				<Option value={group}>{group}</Option>
-			{/each}
-		</Select>
-		<div class="draw-time-pick">
-			<label for="draw-time">开奖日期</label>
-			<DateInput bind:value={$drawTime.value} format="yyyy-MM-dd HH:mm" />
+		<div class="field">
+			<Select label="QQ群" bind:value={$groupCode.value}>
+				{#each groups as group}
+					<Option value={group}>{group}</Option>
+				{/each}
+			</Select>
+		</div>
+
+		<div class="field">
+			<Autocomplete
+				getOptionLabel={(option) => (option ? option.Uin + `(${option.Nickname})` : '')}
+				search={async (input) => {
+					const linput = input.toLowerCase();
+					if (linput === '') {
+						return false;
+					}
+					let result = (await $senderIdOptions).filter((item) =>
+						(item.Uin + '').toLowerCase().includes(linput)
+					);
+					result = result.slice(0, 5);
+					result.sort((a, b) => {
+						const aString = a.Nickname.toLowerCase();
+						const bString = b.Nickname.toLowerCase();
+						if (aString.startsWith(linput) && !bString.startsWith(linput)) {
+							return -1;
+						} else if (bString.startsWith(linput) && !aString.startsWith(linput)) {
+							return 1;
+						}
+						return 0;
+					});
+					return result;
+				}}
+				bind:value={$senderId.value}
+				label="QQ号码"
+			/>
+			{#if $myForm.hasError('senderId.required')}
+				<div class="invalid-alert">QQ号码不能为空</div>
+			{/if}
+		</div>
+
+		<div class="field">
+			<label for="draw-time-picker">开奖日期</label>
+			<div class="draw-time-picker">
+				<DateInput bind:value={$drawTime.value} format="yyyy-MM-dd HH:mm" />
+			</div>
 		</div>
 	</section>
 	<Button on:click={handleSubmit} variant="raised" disabled={!$myForm.valid}>提交</Button>
@@ -96,26 +120,12 @@
 	main {
 		text-align: center;
 		padding: 1em;
-		max-width: 480px;
+		/* max-width: 480px; */
 		margin: 0 auto;
 	}
-	/* limit this to component scope only */
-	* :global(.field),
-	* :global(.field  > div),
-	.draw-time-pick {
-		display: flex;
-	}
 
-	.draw-time-pick label {
-		display: flex;
-		flex: 1;
-		/* text-align: center;
-		align-content: center; */
-	}
-
-	.draw-time-pick {
-		margin-top: 8px;
-		font-size: 1.1rem;
+	.field {
+		display: block;
 	}
 
 	section {
