@@ -6,5 +6,11 @@ export interface RollEvent {
     msgId: number;
     groupCode: number;
     groupName: string;
-    participants: any[];
+    participants: GroupMember[];
+}
+
+export interface GroupMember {
+    Nickname: string
+    CardName: string
+    Uin: number
 }

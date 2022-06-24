@@ -7,11 +7,12 @@
 	import { DateInput } from 'date-picker-svelte';
 	import axios from 'axios';
 	import { toast } from '@zerodevx/svelte-toast';
-	import type { RollEvent } from '$lib/types';
+	import type { RollEvent, GroupMember } from '$lib/types';
 	import { SvelteToast } from '@zerodevx/svelte-toast';
 	import Autocomplete from '@smui-extra/autocomplete';
-	import { derived } from 'svelte/store';
+	import { derived, type Readable } from 'svelte/store';
 	import type { Field } from 'svelte-forms/types';
+
 
 	const successOptions = {
 		theme: {
@@ -19,6 +20,8 @@
 			'--toastBarBackground': '#2F855A'
 		}
 	};
+
+
 
 	let groups = ['852485822', '1007452144'];
 
@@ -28,7 +31,7 @@
 	const groupCode = field('groupCode', groups[0], [required()]);
 	const myForm = form(skinName, senderId, drawTime, groupCode);
 
-	function getMembers(x: Field<string>): Promise<any[]> {
+	function getMembers(x: Field<string>): Promise<GroupMember[]> {
 		return axios
 			.get('/api/members/' + x.value)
 			.then((res) => res.data.members)
@@ -52,6 +55,10 @@
 			toast.push('Successfully submitted: ' + res.data.insertedId, successOptions);
 		});
 	}
+
+	function getOptionLabel(option: GroupMember)  {
+		return (option ? option.Uin + `(${option.Nickname})`: '')
+	} 
 </script>
 
 <main>
@@ -74,14 +81,14 @@
 
 		<div class="field">
 			<Autocomplete
-				getOptionLabel={(option) => (option ? option.Uin: '')}
+				getOptionLabel={getOptionLabel}
 				search={async (input) => {
 					const linput = input.toLowerCase();
 					if (linput === '') {
 						return false;
 					}
 					let result = (await $senderIdOptions).filter((item) =>
-						(item.Uin + '').toLowerCase().includes(linput)
+						getOptionLabel(item).toLowerCase().includes(linput)
 					);
 					result = result.slice(0, 5);
 					result.sort((a, b) => {
