@@ -13,18 +13,13 @@
 	import { derived, type Readable } from 'svelte/store';
 	import type { Field } from 'svelte-forms/types';
 
-
 	const successOptions = {
 		theme: {
 			'--toastBackground': '#48BB78',
 			'--toastBarBackground': '#2F855A'
 		}
 	};
-
-
-
-	let groups = ['852485822', '1007452144'];
-
+	const groups = ['852485822'];
 	const skinName = field('skinName', '纪念龙狙', [required()]);
 	const senderId = field('senderId', '', [required()]);
 	const drawTime = field('drawTime', new Date(), [required()]);
@@ -56,11 +51,15 @@
 		});
 	}
 
-	function getOptionLabel(option: GroupMember)  {
-		return (option ? option.Uin + `(${option.Nickname})`: '')
-	} 
+	function getOptionLabel(option: GroupMember) {
+		return option ? option.Uin + `(${option.Nickname})` : '';
+	}
 </script>
 
+<svelte:head>
+	<title>预约抽奖</title>
+	<html lang="en" />
+</svelte:head>
 <main>
 	<h1>开始抽奖吧</h1>
 	<section>
@@ -81,7 +80,7 @@
 
 		<div class="field">
 			<Autocomplete
-				getOptionLabel={getOptionLabel}
+				{getOptionLabel}
 				search={async (input) => {
 					const linput = input.toLowerCase();
 					if (linput === '') {
@@ -111,7 +110,7 @@
 			{/if}
 		</div>
 
-		<div class="field">
+		<div class="field draw-time-field">
 			<label for="draw-time-picker">开奖日期</label>
 			<div class="draw-time-picker">
 				<DateInput bind:value={$drawTime.value} format="yyyy-MM-dd HH:mm" />
@@ -125,18 +124,20 @@
 
 <style>
 	main {
-		text-align: center;
 		padding: 1em;
-		/* max-width: 480px; */
 		margin: 0 auto;
 	}
 
 	.field {
-		display: block;
+		display: flex;
 	}
 
 	section {
 		margin-bottom: 10px;
+	}
+
+	.draw-time-field {
+		margin-top: 20px;
 	}
 
 	.invalid-alert {
