@@ -2,7 +2,7 @@
 	"name": "csgo-roll",
 	"version": "0.0.1",
 	"scripts": {
-		"dev": "svelte-kit dev",
+		"dev": "svelte-kit dev --host",
 		"build": "svelte-kit build",
 		"package": "svelte-kit package",
 		"preview": "svelte-kit preview",
@@ -39,6 +39,7 @@
 		"@smui-extra/autocomplete": "^6.0.0-beta.16",
 		"@smui/select": "^6.0.0-beta.16",
 		"axios": "^0.27.2",
+		"dotenv": "^16.0.1",
 		"mongodb": "^4.7.0",
 		"svelte-forms": "^2.3.1",
 		"svelte-material-ui": "^6.0.0-beta.16"
