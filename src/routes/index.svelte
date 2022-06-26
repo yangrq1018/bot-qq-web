@@ -86,8 +86,9 @@
 					if (linput === '') {
 						return false;
 					}
-					let result = (await $senderIdOptions).filter((item) =>
-						getOptionLabel(item).toLowerCase().includes(linput)
+					let result = (await $senderIdOptions).filter(
+						(item) =>
+							getOptionLabel(item).toLowerCase().includes(linput) || item.Nickname.includes(linput)
 					);
 					result = result.slice(0, 5);
 					result.sort((a, b) => {
@@ -108,6 +109,10 @@
 			{#if $myForm.hasError('senderId.required')}
 				<div class="invalid-alert">QQ号码不能为空</div>
 			{/if}
+		</div>
+
+		<div class=field>
+			
 		</div>
 
 		<div class="field draw-time-field">
