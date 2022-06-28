@@ -10,9 +10,7 @@
 	let syncing = true;
 
 	function handleSocketMessage(e: MessageEvent<any>) {
-		const data = JSON.parse(e.data)
-		const payload = data.payload;
-		const signal = data.signal;
+		const {payload, signal} = JSON.parse(e.data);
 		if (signal === "sync_done") {
 			bonds = temp
 			syncing = false
