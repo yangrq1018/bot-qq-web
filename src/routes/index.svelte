@@ -2,7 +2,7 @@
 	import { form, field } from 'svelte-forms';
 	import { required } from 'svelte-forms/validators';
 	import Textfield from '@smui/textfield';
-	import Button, { GroupItem } from '@smui/button';
+	import Button from '@smui/button';
 	import Select, { Option } from '@smui/select';
 	import CheckBox from '@smui/checkbox';
 	import { DateInput } from 'date-picker-svelte';
@@ -11,14 +11,15 @@
 	import type { RollEvent, GroupMember, GroupInfo } from '$lib/types';
 	import { SvelteToast } from '@zerodevx/svelte-toast';
 	import Autocomplete from '@smui-extra/autocomplete';
-	import { derived, type Readable } from 'svelte/store';
+	import { derived } from 'svelte/store';
 	import type { Field } from 'svelte-forms/types';
 	import FormField from '@smui/form-field';
 	import { onMount } from 'svelte';
-	import CircularProgress from '@smui/circular-progress';
+
 
 	let groups: GroupInfo[] = [];
 	let isAdmin = false;
+	let submitting = false;
 	const successOptions = {
 		theme: {
 			'--toastBackground': '#48BB78',
@@ -30,7 +31,7 @@
 	const senderId = field('senderId', '', [required()]);
 	const drawTime = field('drawTime', new Date(), [required()]);
 	const groupCode = field('groupCode', '', [required()]);
-	let senderIdOptions = derived(groupCode, getMembers);
+	const senderIdOptions = derived(groupCode, getMembers);
 	const myForm = form(skinName, senderId, drawTime, groupCode);
 
 	onMount(async () => {
@@ -42,11 +43,13 @@
 		}
 	});
 
-	function getMembers(x: Field<string>): Promise<GroupMember[]> {
+	async function getMembers(x: Field<string>) {
 		if (!x.value) {
 			return Promise.resolve([]);
 		}
-		return axios.get('/api/members/' + x.value).then((res) => res.data.members);
+
+		const res = await axios.get('/api/members/' + x.value);
+		return res.data.members as GroupMember[];
 	}
 
 	function handleSubmit() {
@@ -58,10 +61,16 @@
 	}
 
 	function submitRollEvent(r: RollEvent) {
+		submitting = true;
 		r.drawTime.setSeconds(0, 0);
-		axios.post('/api/roll', r).then((res) => {
-			toast.push('Successfully submitted: ' + res.data.insertedId, successOptions);
-		});
+		axios
+			.post('/api/roll', r)
+			.then((res) => {
+				toast.push('提交成功：' + res.data.insertedId, successOptions);
+			})
+			.finally(() => {
+				submitting = false;
+			});
 	}
 
 	function getOptionLabel(option: GroupMember) {
@@ -113,15 +122,11 @@
 
 		<div class="field">
 			<FormField>
-				{#if groups.length > 0}
-					<Select label="QQ群" bind:value={$groupCode.value}>
-						{#each groups as group}
-							<Option value={group.Code + ''}>{group.Name}</Option>
-						{/each}
-					</Select>
-				{:else}
-					<CircularProgress style="height: 24px; width: 24px;" indeterminate />
-				{/if}
+				<Select disabled={groups.length <= 0} label="QQ群" bind:value={$groupCode.value}>
+					{#each groups as group}
+						<Option value={group.Code + ''}>{group.Name}</Option>
+					{/each}
+				</Select>
 			</FormField>
 		</div>
 
@@ -159,7 +164,9 @@
 	</section>
 
 	<div class="submit-region">
-		<Button on:click={handleSubmit} variant="raised" disabled={!$myForm.valid}>提交</Button>
+		<Button on:click={handleSubmit} variant="raised" disabled={!$myForm.valid || submitting}>
+			{submitting ? '提交中' : '提交'}
+		</Button>
 		<Button on:click={myForm.reset} variant="raised">重置</Button>
 	</div>
 	<SvelteToast />
