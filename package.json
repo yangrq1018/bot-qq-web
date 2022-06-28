@@ -13,11 +13,6 @@
 		"format": "prettier --write --plugin-search-dir=. ."
 	},
 	"devDependencies": {
-		"@smui/button": "^6.0.0-beta.16",
-		"@smui/checkbox": "^6.0.0-beta.16",
-		"@smui/circular-progress": "^6.0.0-beta.16",
-		"@smui/form-field": "^6.0.0-beta.16",
-		"@smui/textfield": "^6.0.0-beta.16",
 		"@sveltejs/adapter-auto": "next",
 		"@sveltejs/adapter-node": "^1.0.0-next.78",
 		"@sveltejs/kit": "next",
@@ -39,8 +34,15 @@
 	},
 	"type": "module",
 	"dependencies": {
+		"@smui/data-table": "^6.0.0-beta.16",
 		"@smui-extra/autocomplete": "^6.0.0-beta.16",
+		"@smui/button": "^6.0.0-beta.16",
+		"@smui/checkbox": "^6.0.0-beta.16",
+		"@smui/circular-progress": "^6.0.0-beta.16",
+		"@smui/form-field": "^6.0.0-beta.16",
+		"@smui/icon-button": "^6.0.0-beta.16",
 		"@smui/select": "^6.0.0-beta.16",
+		"@smui/textfield": "^6.0.0-beta.16",
 		"axios": "^0.27.2",
 		"dotenv": "^16.0.1",
 		"mongodb": "^4.7.0",
