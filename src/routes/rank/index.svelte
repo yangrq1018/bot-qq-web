@@ -5,25 +5,35 @@
 
 	const websocketURL = 'wss://nowtest.xuanlingasset.com/ws';
 	let socket: WebSocket;
-
 	let bonds: Price[] = [];
+	let temp: Price[] = []; // a temporary buffer to hold initial syncing bonds
+	let syncing = true;
 
 	function handleSocketMessage(e: MessageEvent<any>) {
-		const payload = JSON.parse(e.data).payload;
-        payload["valueOn"] = new Date(payload["valueOn"]);
-        const bean = payload as Price;
-        let matched = false;
-        bonds.forEach((b, i) => {
-            if (b.bondCode == bean.bondCode) {
-                bonds[i] = bean;
-                matched = true
-                return
-            }
-        })
+		const data = JSON.parse(e.data)
+		const payload = data.payload;
+		const signal = data.signal;
+		if (signal === "sync_done") {
+			bonds = temp
+			syncing = false
+			return
+		}
+		payload['valueOn'] = new Date(payload['valueOn']);
+		const bean = payload as Price;
+		let matched = false;
+		bonds.forEach((b, i) => {
+			if (b.bondCode == bean.bondCode) {
+				bonds[i] = bean;
+				matched = true;
+				return;
+			}
+		});
 
-        if (!matched) {
-            bonds.push(bean);
-        }
+		if (!matched) {
+			// don't use bonds.push, won't trigger child component prop update
+			// svelte reactivity is triggered by assignment
+			temp = [...temp, bean];
+		}
 	}
 
 	// obtain a websock
@@ -39,4 +49,4 @@
 	});
 </script>
 
-<Table rows={bonds} />
+<Table rows={bonds} loaded={!syncing} />
