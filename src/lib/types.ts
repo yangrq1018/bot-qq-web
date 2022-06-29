@@ -38,7 +38,7 @@ export interface Price {
 }
 
 export interface Cashflow {
-    id: number
+    id?: number
     strategy: string
     fundAccount: string
     fundFlow: number

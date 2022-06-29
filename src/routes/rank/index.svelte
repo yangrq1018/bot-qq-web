@@ -10,27 +10,26 @@
 	let syncing = true;
 
 	function handleSocketMessage(e: MessageEvent<any>) {
-		const {payload, signal} = JSON.parse(e.data);
-		if (signal === "sync_done") {
-			bonds = temp
-			syncing = false
-			return
+		const { payload, signal } = JSON.parse(e.data);
+		if (signal === 'sync_done') {
+			bonds = temp;
+			syncing = false;
+			return;
 		}
 		payload['valueOn'] = new Date(payload['valueOn']);
 		const bean = payload as Price;
-		let matched = false;
-		bonds.forEach((b, i) => {
-			if (b.bondCode == bean.bondCode) {
-				bonds[i] = bean;
-				matched = true;
-				return;
-			}
-		});
 
-		if (!matched) {
+		if (syncing) {
 			// don't use bonds.push, won't trigger child component prop update
 			// svelte reactivity is triggered by assignment
 			temp = [...temp, bean];
+		} else {
+			bonds.forEach((b, i) => {
+				if (b.bondCode === bean.bondCode) {
+					bonds[i] = bean;
+					return;
+				}
+			});
 		}
 	}
 
