@@ -10,6 +10,7 @@
 	import Textfield from '@smui/textfield';
 	import Button from '@smui/button';
 	import { SvelteToast, toast } from '@zerodevx/svelte-toast';
+	import IconButton from '@smui/icon-button';
 
 	let rows: Cashflow[] = [];
 	let loaded = true;
@@ -22,14 +23,8 @@
 	});
 	let cashIO = 0;
 
-	onMount(() => {
-		axios.get('/api/cash').then((res) => {
-			const cashflows = res.data as Cashflow[];
-			rows = cashflows;
-		});
-
-		option.subscribe((o) => {
-			const base = '/api/cash';
+	function refresh(o: any) {
+		const base = '/api/cash';
 			const params = new URLSearchParams();
 			if (o.strategy) {
 				params.set('strategy', o.strategy);
@@ -42,7 +37,15 @@
 				const cashflows = res.data as Cashflow[];
 				rows = cashflows;
 			});
+	}
+
+	onMount(() => {
+		axios.get('/api/cash').then((res) => {
+			const cashflows = res.data as Cashflow[];
+			rows = cashflows;
 		});
+
+		option.subscribe(refresh);
 	});
 
 	function submitCashIO() {
@@ -78,6 +81,7 @@
 		</Select>
 		<Textfield type="number" label="出入金额" bind:value={cashIO} />
 		<Button on:click={submitCashIO} variant="raised">增加出入金</Button>
+	<IconButton on:click={() => refresh($option) } class="material-icons">refresh</IconButton>
 	</div>
 	<DataTable sortable stickyHeader style="max-width: 100%">
 		<Head>
