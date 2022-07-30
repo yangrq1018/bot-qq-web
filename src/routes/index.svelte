@@ -33,11 +33,13 @@
 	const groupCode = field('groupCode', '', [required()]);
 	const senderIdOptions = derived(groupCode, getMembers);
 	const myForm = form(skinName, senderId, drawTime, groupCode);
+	const csgoGroupCode = 852485822;
 
 	onMount(async () => {
 		groups = (await axios.get('/api/groups').then((res) => res.data)) as GroupInfo[];
-		if (groups.filter((g) => g.Name.includes('总部'))) {
-			groupCode.set(groups.filter((g) => g.Name.includes('总部'))[0].Code + '');
+		let defaultMatch = groups.filter((g) => g.Code === csgoGroupCode);
+		if (defaultMatch) {
+			groupCode.set(defaultMatch[0].Code + '');
 		} else if (groups.length > 0) {
 			groupCode.set(groups[0].Code + '');
 		}
