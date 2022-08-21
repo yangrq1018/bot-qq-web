@@ -6,6 +6,7 @@ export interface RollEvent {
     msgId: number;
     groupCode: number;
     groupName: string;
+    winnerCount: number;
     participants: GroupMember[];
 }
 

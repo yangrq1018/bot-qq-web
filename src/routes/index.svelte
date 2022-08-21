@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { form, field } from 'svelte-forms';
-	import { required } from 'svelte-forms/validators';
+	import { required  } from 'svelte-forms/validators';
 	import Textfield from '@smui/textfield';
 	import Button from '@smui/button';
 	import Select, { Option } from '@smui/select';
@@ -31,8 +31,9 @@
 	const senderId = field('senderId', '', [required()]);
 	const drawTime = field('drawTime', new Date(), [required()]);
 	const groupCode = field('groupCode', '', [required()]);
+	const winnerCount = field('winnerCount', 1, [required()])
 	const senderIdOptions = derived(groupCode, getMembers);
-	const myForm = form(skinName, senderId, drawTime, groupCode);
+	const myForm = form(skinName, senderId, drawTime, groupCode, winnerCount);
 	const csgoGroupCode = 852485822;
 
 	onMount(async () => {
@@ -68,10 +69,13 @@
 		axios
 			.post('/api/roll', r)
 			.then((res) => {
-				toast.push('提交成功：' + res.data.insertedId, successOptions);
+				alert('提交成功：' + res.data.insertedId);
+			})
+			.catch(e => {
+				toast.push('提交失败' + e);
 			})
 			.finally(() => {
-				submitting = false;
+				setTimeout(() => {submitting = false}, 1000);
 			});
 	}
 
@@ -81,7 +85,7 @@
 
 	async function searchQQUin(input: string) {
 		const linput = input.toLowerCase();
-		if (linput === '') {
+		if (linput === '' || input.includes('(') && input.includes(')')) {
 			return false;
 		}
 
@@ -146,6 +150,13 @@
 			</FormField>
 		</div>
 
+		<div class="field"> 
+			<FormField>
+				<Textfield bind:value={$winnerCount.value} label="奖品数量" type="number">
+				</Textfield>
+			</FormField>
+		</div>
+
 		<div class="field">
 			<FormField>
 				<CheckBox bind:value={isAdmin} />
@@ -159,6 +170,7 @@
 			<FormField>
 				<label for="draw-time-picker">开奖日期</label>
 				<div class="draw-time-picker">
+					<!-- TODO check time is value -->
 					<DateInput bind:value={$drawTime.value} format="yyyy-MM-dd HH:mm" />
 				</div>
 			</FormField>

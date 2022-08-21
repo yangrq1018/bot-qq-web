@@ -20,6 +20,7 @@ export async function post(event: RequestEvent) {
             draw_time: new Date(body.drawTime),
             group_code: body.senderId.Group.Code,
             group_name: body.senderId.Group.Name,
+            winner_count: body.winnerCount,
             source: "web",
             participants: [],
         })
